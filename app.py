@@ -325,10 +325,9 @@ st.markdown("---")
 def render_welcome():
     st.markdown("""
     <div class="welcome-card">
-        <div class="welcome-title">👋 Hello! I am your R&D Compliance Assistant.</div>
+        <div class="welcome-title">👋 Hello! I am the Australian R&D Tax Incentive Assistant.</div>
         <div class="welcome-subtitle">
-            I can help you navigate the Australian R&D Tax Incentive (RDTI) program.
-            My knowledge is drawn directly from the official R&D Tax Incentive Handbook.
+            I can provide general guidance on the R&D Tax Incentive in Australia.
         </div>
         <br/>
         <div class="capability-item"><span class="capability-dot">•</span> Understanding Australian R&D tax incentive requirements</div>
@@ -386,11 +385,14 @@ def generate_response(user_query: str, api_key: str, model: str) -> tuple[str, l
         if msg["role"] in ("user", "assistant"):
             history.append({"role": msg["role"], "content": msg["content"]})
 
-    system_prompt = """You are an expert Australian R&D Tax Incentive (RDTI) compliance assistant. 
-Your knowledge comes from the official R&D Tax Incentive Handbook by Bruce Patten of Pattens Group Pty Ltd.
+    system_prompt = """You are an expert Australian R&D Tax Incentive (RDTI) compliance assistant.
+
+IMPORTANT GREETING RULE:
+- If the user sends a greeting (e.g. "hi", "hello", "hey", "good morning", etc.) or a non-specific message, respond warmly with: "Hello! I am the Australian R&D Tax Incentive Assistant. I can provide general guidance on the R&D Tax Incentive in Australia. If you have a specific question about the R&D Tax Incentive, please feel free to ask, and I will do my best to provide you with accurate information. Remember, for specific tax situations, it's always best to consult with a qualified R&D tax specialist or Grants Specialist."
+- Do NOT mention any handbook, knowledge base, or source documents when responding to greetings.
 
 INSTRUCTIONS:
-- Answer questions accurately using the provided context from the handbook.
+- Answer questions accurately using the provided context.
 - Be specific and practical — give concrete guidance, not vague generalities.
 - When quoting figures (e.g., offset rates, deadlines), be precise.
 - Use Australian English spelling.
@@ -399,6 +401,7 @@ INSTRUCTIONS:
 - Always encourage professional advice for specific tax situations.
 - Be concise but comprehensive.
 - Do NOT make up information. If you're unsure, say so.
+- Do NOT mention any handbook or source documents in your responses.
 
 DISCLAIMER: Always note that this is general guidance only and specific situations should be reviewed by a qualified R&D tax specialist or Grants Specialist."""
 
@@ -407,18 +410,18 @@ DISCLAIMER: Always note that this is general guidance only and specific situatio
     messages = [{"role": "system", "content": system_prompt}]
     messages.append({
         "role": "user",
-        "content": f"""HANDBOOK CONTEXT:
+        "content": f"""REFERENCE CONTEXT:
 {context}
 
 USER QUESTION: {user_query}
 
-Please answer the question based on the handbook context above."""
+Please answer the question based on the reference context above. Do not mention any handbook or source documents in your answer."""
     })
 
     response = client.chat.completions.create(
         model=model,
         messages=messages,
-        temperature=0.2,
+        temperature=0.6,
         max_tokens=1200,
     )
 
